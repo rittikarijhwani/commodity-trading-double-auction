@@ -12,12 +12,15 @@ contract AuctionSession
         uint startTime;
         uint endTime;
         bool isActive;
+        address auctioneer; //auctioneer who started the auction
     }
 
-    mapping(uint => Auction) public auctions; //maps an ID to an auction structure
+    mapping(uint => Auction) public auctions; //maps an ID to an auction structure //PUT AUCTION WHILE TESTING
 
     uint public auctionCount; //counts total number of auctions created
     bool public auctionActive; //tracks if an auction is currently active
+
+    mapping(address => uint) public completedAuctionsByAuctioneer; //mapping for auctioneer completed auctions count - //PUT AUCTIONEER ADDRESS WHILE TESTING
 
     //declares contract variables so we can interact with them
     UserManagement public userManagement;
@@ -46,7 +49,7 @@ contract AuctionSession
 
         auctionCount++; 
        
-        auctions[auctionCount] = Auction(_commodityId, block.timestamp, block.timestamp + _duration, true); 
+        auctions[auctionCount] = Auction(_commodityId, block.timestamp, block.timestamp + _duration, true, msg.sender); 
         //creates and stores auction in auction mapping using auction count as key with value as other auction structure variables^
         
         auctionActive = true; //for checks later
@@ -57,16 +60,18 @@ contract AuctionSession
     function endAuction(uint _auctionId) external onlyAuctioneer 
     {
         require(auctions[_auctionId].isActive, "Auction is not active."); //ensures auction exists and is active
-        require(block.timestamp >= auctions[_auctionId].endTime, "Auction still running."); //ensures auction has ended before allowing to proceed with this or other functions 
 
         auctions[_auctionId].isActive = false; //marks auction inactive
         auctionActive = false; //for checks
 
+        //updating completed auctions count for the auctioneer who started this auction
+        completedAuctionsByAuctioneer[auctions[_auctionId].auctioneer] += 1;
+
         emit AuctionEnded(_auctionId, auctions[_auctionId].commodityId); //triggers event
     }
 
-    function getAuction(uint _id) external view returns (Auction memory) 
+    function getAuction(uint _auctionid) external view returns (Auction memory) 
     {//gives auction structure information using ID as input
-        return auctions[_id];
+        return auctions[_auctionid];
     }
 }
