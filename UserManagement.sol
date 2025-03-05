@@ -13,16 +13,16 @@ contract UserManagement
     event UserRegistered(address indexed user, Role role); //kinda declares user acc and role to front-end and blockchain
     //indexed to make it easier to track^
 
-    function registerUser(address _user, Role _role) external //registers a user with a role and prevents duplicates
+    function registerUser(address user, Role role) external //registers a user with a role and prevents duplicates
     {
-        require(userRoles[_user] == Role.None, "This user is already registered."); //checks for duplicates
-        userRoles[_user] = _role; //assigns role
-        emit UserRegistered(_user, _role); //triggers event
+        require(userRoles[user] == Role.None, "This user is already registered."); //checks for duplicates
+        userRoles[user] = role; //assigns role
+        emit UserRegistered(user, role); //triggers event
     }
 
 
-    function getUserRole(address _user) external view returns (Role) //to check user role
+    function getUserRole(address user) external view returns (Role) //to check user role
     {
-        return userRoles[_user];
+        return userRoles[user];
     }
 }
